@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Questionario Cefalee</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f3f5f4; --surface:#ffffff; --ink:#1a2a30; --muted:#5b6d72; --line:#d6dedc;
+  --accent:#1c5d6c; --accent-ink:#ffffff; --accent-soft:#e1eef0; --warn:#9a5b12; --warn-soft:#fbf1e3;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --bg:#111a1d; --surface:#18252a; --ink:#e4ecea; --muted:#9aaeb0; --line:#2c3d42;
+    --accent:#6fb8c7; --accent-ink:#0d1b1f; --accent-soft:#1f3a41; --warn:#e0a25a; --warn-soft:#3a2c1a;
+  }
+}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+h1,h2{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:26px}
+h2{font-size:22px}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+[hidden]{display:none!important}
+.progress{display:flex;flex-direction:column;gap:6px}
+.progress .meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+.lead{font-size:16px}
+.nav{display:flex;gap:12px;justify-content:space-between;position:sticky;bottom:0;background:var(--surface);padding-block:12px calc(4px + env(safe-area-inset-bottom,0px));margin-bottom:-8px;border-top:1px solid var(--line)}
+button.btn{font-family:inherit;font-size:16px;font-weight:500;padding:12px 18px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.btn.primary.incomplete{opacity:.55}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* griglia di domande */
+.items{display:flex;flex-direction:column;gap:6px}
+.item{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-bottom:1px solid var(--line);scroll-margin:90px}
+.item:last-child{border-bottom:0}
+.item .q{font-weight:500;display:flex;gap:10px}
+.item .q .n{flex:none;font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:2px;min-width:18px}
+.item.missing{background:var(--warn-soft);border-radius:8px;padding-inline:8px}
+.chips{display:grid;gap:6px}
+.chip{font-family:inherit;font-size:14px;line-height:1.2;min-height:48px;padding:6px 4px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:center}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-checked="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.legend{display:grid;gap:4px;font-size:13px;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 12px}
+.legend b{color:var(--ink);font-weight:600}
+/* campi */
+.fields{display:flex;flex-direction:column;gap:4px}
+.f{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.f:last-child{border-bottom:0}
+.f label,.f .lab{font-weight:500}
+.f select{-webkit-appearance:none;appearance:none;font-family:var(--mono);font-size:22px;line-height:1.2;height:54px;padding:0 40px 0 14px;border:1.5px solid var(--line);border-radius:10px;color:var(--ink);width:100%;max-width:220px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235b6d72' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center}
+.timepick{display:flex;align-items:center;gap:8px}
+.f .timepick select{width:96px;flex:none;padding-right:32px;background-position:right 10px center}
+.timepick span{font-family:var(--mono);font-size:22px}
+.f input[type=text]{font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);width:100%}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:52px;height:52px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:24px;cursor:pointer;flex:none}
+.f .stepper input[type=text]{width:90px;flex:none;font-size:24px;text-align:center;font-family:var(--mono);font-size:24px;padding:10px 6px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.stepper .u{font-size:14px;color:var(--muted)}
+.hint{font-size:14px;color:var(--warn)}
+.tip{font-size:14px;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 12px}
+/* risultati */
+.res-sec{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+.res-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:6px}
+.res-head h3{margin:0;font-family:var(--serif);font-size:18px;font-weight:600}
+.res-head .v{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.res-head .v small{font-size:14px;color:var(--muted)}
+table.dims{width:100%;border-collapse:collapse;font-size:14px}
+table.dims td{padding:6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.dims td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;padding-left:12px;white-space:nowrap}
+@media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">UOC Terapia Antalgica · AOUI Verona</span>
+    <h1>Questionario cefalee</h1>
+  </header>
+  <div class="progress" id="progress" hidden>
+    <div class="meta"><span id="progLabel"></span><span id="progCount"></span></div>
+    <div class="bar"><i id="progBar"></i></div>
+  </div>
+  <main id="screen"></main>
+</div>
+
+<script>
+/* ====== TESTI DEGLI ITEM (versioni italiane in uso in reparto) ====== */
+const HIT = [
+  "Quando ha mal di testa, quanto spesso il dolore è forte?",
+  "Quanto spesso il mal di testa limita la sua capacità di svolgere le attività quotidiane abituali, compresi i lavori di casa, il lavoro, lo studio o le attività con gli altri?",
+  "Quando ha mal di testa, quanto spesso vorrebbe potersi sdraiare?",
+  "Nelle ultime 4 settimane, quanto spesso si è sentito/a troppo stanco/a per lavorare o per svolgere le sue attività quotidiane, a causa del mal di testa?",
+  "Nelle ultime 4 settimane, quanto spesso ha avuto la sensazione di non poterne più o si è sentito/a irritato/a, a causa del mal di testa?",
+  "Nelle ultime 4 settimane, quanto spesso il mal di testa ha limitato la sua capacità di concentrarsi sul lavoro o sulle attività quotidiane?"
+];
+const HIT_OPTS = ["Mai","Raramente","Qualche volta","Molto spesso","Sempre"];
+const HIT_PTS = [6,8,10,11,13];
+
+const ESS = [
+  "Seduto mentre leggo",
+  "Guardando la TV",
+  "Seduto, inattivo in un luogo pubblico (a teatro, a una conferenza)",
+  "Passeggero in automobile, per un'ora senza sosta",
+  "Sdraiato per riposare nel pomeriggio, quando ne ho l'occasione",
+  "Seduto mentre parlo con qualcuno",
+  "Seduto tranquillamente dopo pranzo, senza avere bevuto alcolici",
+  "In automobile, fermo per pochi minuti nel traffico"
+];
+const ESS_OPTS = ["Mai","Qualche","Discreta","Alta"];
+const ESS_FULL = ["non mi addormento mai","ho qualche probabilità di addormentarmi","ho una discreta probabilità di addormentarmi","ho un'alta probabilità di addormentarmi"];
+
+const PF = ["Mai","Meno di 1 volta a sett.","1–2 volte a sett.","3 o più volte a sett."];
+const PF_FULL = ["Non durante l'ultimo mese","Meno di una volta a settimana","Una o due volte a settimana","Tre o più volte a settimana"];
+const PSQI5 = [
+  ["a","Non riuscire ad addormentarsi entro 30 minuti"],
+  ["b","Svegliarsi nel mezzo della notte o al mattino presto senza riaddormentarsi subito"],
+  ["c","Alzarsi nel mezzo della notte per andare in bagno"],
+  ["d","Non riuscire a respirare bene"],
+  ["e","Tossire o russare forte"],
+  ["f","Sentire troppo freddo"],
+  ["g","Sentire troppo caldo"],
+  ["h","Fare brutti sogni"],
+  ["i","Avere dolore"]
+];
+const LAT_OPTS = ["15 minuti o meno","16–30 minuti","31–60 minuti","Più di 60 minuti"];
+const MIDAS = [
+  ["Quanti giorni di assenza dal lavoro o da scuola ha fatto a causa del mal di testa?", null],
+  ["Per quanti giorni il suo rendimento sul lavoro o a scuola si è ridotto della metà o più a causa del mal di testa?", "Senza contare i giorni di assenza della domanda 1."],
+  ["Per quanti giorni non ha svolto i lavori di casa a causa del mal di testa?", null],
+  ["Per quanti giorni il suo rendimento nei lavori di casa si è ridotto della metà o più a causa del mal di testa?", "Senza contare i giorni della domanda 3."],
+  ["Per quanti giorni non ha partecipato ad attività familiari, sociali o di svago a causa del mal di testa?", null]
+];
+
+/* ====== SCHERMATE ====== */
+const A = {};
+const SCREENS = [
+  {id:"intro"},
+  {id:"hit",  label:"Il mal di testa (HIT-6)"},
+  {id:"ess",  label:"Sonnolenza di giorno (Epworth)"},
+  {id:"orari",label:"Il sonno, orari (PSQI)"},
+  {id:"dist", label:"Il sonno, disturbi (PSQI)"},
+  {id:"qual", label:"Il sonno, in generale (PSQI)"},
+  {id:"midas",label:"Giorni persi (MIDAS)"},
+  {id:"result"}
+];
+const NQ = SCREENS.length-2;
+let cur = 0;
+const screen = document.getElementById("screen");
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* selettore orario: ore in ordine utile (sera per coricarsi, mattina per alzarsi), minuti a 5 */
+const TP = {};
+function timeOpts(k,part){
+  const [ch,cm] = (A[k]||"").split(":");
+  if(part==="h"){
+    const start = k==="bed" ? 18 : 3;
+    let o = `<option value="">--</option>`;
+    for(let i=0;i<24;i++){ const h = String((start+i)%24).padStart(2,"0"); o += `<option value="${h}"${h===ch?" selected":""}>${h}</option>`; }
+    return o;
+  }
+  let o = `<option value="">--</option>`;
+  for(let m=0;m<60;m+=5){ const v = String(m).padStart(2,"0"); o += `<option value="${v}"${v===cm?" selected":""}>${v}</option>`; }
+  return o;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function setProgress(){
+  const s = SCREENS[cur], p = document.getElementById("progress");
+  if(!s.label){ p.hidden = true; return; }
+  p.hidden = false;
+  document.getElementById("progLabel").textContent = s.label;
+  document.getElementById("progCount").textContent = cur+" di "+NQ;
+  document.getElementById("progBar").style.width = ((cur-1)/NQ*100)+"%";
+}
+
+function nav(label){
+  return `<div class="nav"><button type="button" class="btn" id="back">Indietro</button>
+  <button type="button" class="btn primary" id="next">${label||"Avanti"}</button></div>`;
+}
+
+/* gruppo di domande con stessa scala */
+function itemsHTML(list, opts, cols){
+  return `<div class="items">${list.map((it,i)=>`
+    <div class="item" id="it_${it.id}" data-id="${it.id}">
+      <div class="q"><span class="n">${it.n||i+1}</span><span>${esc(it.t)}</span></div>
+      <div class="chips" role="radiogroup" aria-label="${esc(it.t)}" style="grid-template-columns:repeat(${cols||opts.length},1fr)">
+        ${(it.opts||opts).map((o,j)=>`<button type="button" class="chip" role="radio" data-id="${it.id}" data-v="${j}" aria-checked="${A[it.id]===j}">${esc(o)}</button>`).join("")}
+      </div>
+    </div>`).join("")}</div>`;
+}
+function bindChips(onChange){
+  screen.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+    const id = b.dataset.id; A[id] = +b.dataset.v;
+    b.parentElement.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-checked",x===b));
+    const item = document.getElementById("it_"+id); item.classList.remove("missing");
+    if(onChange) onChange(id);
+    refreshNext();
+    // porta in vista la prossima domanda senza risposta, se è sotto
+    const nextItem = [...screen.querySelectorAll(".item")].find(el=>el.compareDocumentPosition(item)&Node.DOCUMENT_POSITION_PRECEDING && A[el.dataset.id]===undefined && !el.hidden);
+    if(nextItem){ const r = nextItem.getBoundingClientRect(); if(r.top > innerHeight*0.6) nextItem.scrollIntoView({behavior:reduced?"auto":"smooth",block:"center"}); }
+  }));
+}
+
+/* requisiti per passare avanti */
+function required(){
+  const id = SCREENS[cur].id;
+  if(id==="hit") return HIT.map((_,i)=>"hit"+i);
+  if(id==="ess") return ESS.map((_,i)=>"ess"+i);
+  if(id==="orari") return ["bed","lat","wake","hrs"];
+  if(id==="dist"){ const r = PSQI5.map(([k])=>"p5"+k).concat("p5j_yn"); if(A.p5j_yn===1) r.push("p5j_txt","p5j"); return r; }
+  if(id==="qual") return ["p6","p7","p8","p9"];
+  if(id==="midas") return MIDAS.map((_,i)=>"m"+i);
+  return [];
+}
+const missing = ()=>required().filter(k=>A[k]===undefined || A[k]==="");
+function refreshNext(){ const nb = document.getElementById("next"); if(nb) nb.classList.toggle("incomplete", missing().length>0); }
+function tryNext(){
+  const m = missing();
+  if(m.length){
+    const el = document.getElementById("it_"+m[0]);
+    m.forEach(k=>{ const e = document.getElementById("it_"+k); if(e) e.classList.add("missing"); });
+    if(el) el.scrollIntoView({behavior:reduced?"auto":"smooth",block:"center"});
+    const h = document.getElementById("missHint"); if(h){ h.hidden=false; h.textContent = m.length===1 ? "Manca 1 risposta: è evidenziata." : `Mancano ${m.length} risposte: sono evidenziate.`; }
+    return;
+  }
+  cur++; render();
+}
+
+function render(){
+  setProgress(); window.scrollTo(0,0);
+  const id = SCREENS[cur].id;
+  if(id==="intro"){
+    screen.innerHTML = `<section class="card">
+      <h2>Prima della visita</h2>
+      <p class="lead">Alcune domande sul mal di testa e sul sonno: 6 pagine, circa 7 minuti.</p>
+      <p>Tocchi la risposta che le sembra più vicina alla sua situazione. Non esistono risposte giuste o sbagliate, e una stima va benissimo.</p>
+      <p class="muted small">Le risposte restano sul suo telefono. Non vengono inviate né salvate da nessuna parte.</p>
+      <div class="nav"><span></span><button type="button" class="btn primary" id="next">Inizia</button></div>
+    </section>`;
+    document.getElementById("next").onclick = ()=>{cur++;render();};
+    return;
+  }
+  if(id==="result"){ renderResult(); return; }
+
+  let body = "";
+  if(id==="hit"){
+    body = `<h2>Il mal di testa</h2>
+      <p>Per ogni domanda tocchi quanto spesso le succede.</p>
+      ${itemsHTML(HIT.map((t,i)=>({id:"hit"+i,t})), HIT_OPTS, 5)}`;
+  } else if(id==="ess"){
+    body = `<h2>Le capita di addormentarsi di giorno?</h2>
+      <p>Che probabilità ha di appisolarsi in queste situazioni, nelle sue abitudini dell'ultimo periodo? Se non le è capitato di recente, immagini come si sentirebbe.</p>
+      <div class="legend">${ESS_OPTS.map((o,i)=>`<span><b>${o}</b> = ${ESS_FULL[i]}</span>`).join("")}</div>
+      ${itemsHTML(ESS.map((t,i)=>({id:"ess"+i,t,n:String.fromCharCode(97+i)})), ESS_OPTS, 4)}`;
+  } else if(id==="orari"){
+    const hrsOpts = []; for(let h=2; h<=12; h+=0.5) hrsOpts.push(h);
+    body = `<h2>Il suo sonno nell'ultimo mese</h2>
+      <p>Pensi a una notte tipica dell'ultimo mese.</p>
+      <div class="fields">
+        <div class="f item" id="it_bed" data-id="bed"><label for="bed_h">A che ora va a letto, di solito?</label>
+          <div class="timepick" role="group" aria-label="Ora">
+            <select id="bed_h" aria-label="Ore">${timeOpts("bed","h")}</select><span>:</span>
+            <select id="bed_m" aria-label="Minuti">${timeOpts("bed","m")}</select></div></div>
+        <div class="f item" id="it_lat" data-id="lat"><span class="lab">Quanto tempo ci mette ad addormentarsi?</span>
+          <div class="chips" role="radiogroup" style="grid-template-columns:repeat(2,1fr)">
+            ${LAT_OPTS.map((o,j)=>`<button type="button" class="chip" role="radio" data-id="lat" data-v="${j}" aria-checked="${A.lat===j}">${o}</button>`).join("")}
+          </div></div>
+        <div class="f item" id="it_wake" data-id="wake"><label for="wake_h">A che ora si alza al mattino, di solito?</label>
+          <div class="timepick" role="group" aria-label="Ora">
+            <select id="wake_h" aria-label="Ore">${timeOpts("wake","h")}</select><span>:</span>
+            <select id="wake_m" aria-label="Minuti">${timeOpts("wake","m")}</select></div></div>
+        <div class="f item" id="it_hrs" data-id="hrs"><label for="hrs">Quante ore dorme davvero per notte?</label>
+          <span class="muted small">Possono essere meno delle ore passate a letto.</span>
+          <select id="hrs"><option value="">Scelga…</option>
+            <option value="1.5"${A.hrs===1.5?" selected":""}>meno di 2 ore</option>
+            ${hrsOpts.map(h=>`<option value="${h}"${A.hrs===h?" selected":""}>${String(h).replace(".5",",5")} ore</option>`).join("")}
+            <option value="12.5"${A.hrs===12.5?" selected":""}>più di 12 ore</option>
+          </select></div>
+      </div>`;
+  } else if(id==="dist"){
+    body = `<h2>Che cosa le ha disturbato il sonno?</h2>
+      <p>Nell'ultimo mese, quante volte ha dormito male a causa di…</p>
+      ${itemsHTML(PSQI5.map(([k,t])=>({id:"p5"+k,t,n:k})), PF, 2)}
+      <div class="items">
+        <div class="item" id="it_p5j_yn" data-id="p5j_yn">
+          <div class="q"><span class="n">j</span><span>Qualche altro problema le ha disturbato il sonno?</span></div>
+          <div class="chips" role="radiogroup" style="grid-template-columns:repeat(2,1fr)">
+            ${["No","Sì"].map((o,j)=>`<button type="button" class="chip" role="radio" data-id="p5j_yn" data-v="${j}" aria-checked="${A.p5j_yn===j}">${o}</button>`).join("")}
+          </div>
+        </div>
+        <div class="item" id="it_p5j_txt" data-id="p5j_txt"${A.p5j_yn===1?"":" hidden"}>
+          <label class="q" for="p5j_txt"><span class="n"></span><span>Quale?</span></label>
+          <input type="text" id="p5j_txt" value="${esc(A.p5j_txt||"")}" autocomplete="off">
+        </div>
+        <div class="item" id="it_p5j" data-id="p5j"${A.p5j_yn===1?"":" hidden"}>
+          <div class="q"><span class="n"></span><span>Quante volte le ha disturbato il sonno?</span></div>
+          <div class="chips" role="radiogroup" style="grid-template-columns:repeat(2,1fr)">
+            ${PF.map((o,j)=>`<button type="button" class="chip" role="radio" data-id="p5j" data-v="${j}" aria-checked="${A.p5j===j}">${o}</button>`).join("")}
+          </div>
+        </div>
+      </div>`;
+  } else if(id==="qual"){
+    body = `<h2>Il sonno, in generale</h2>
+      <p>Sempre pensando all'ultimo mese.</p>
+      ${itemsHTML([
+        {id:"p6",t:"Come valuta complessivamente la qualità del suo sonno?",opts:["Molto buona","Abbastanza buona","Abbastanza cattiva","Molto cattiva"]},
+        {id:"p7",t:"Quante volte ha preso farmaci (prescritti dal medico o no) per aiutarsi a dormire?"},
+        {id:"p8",t:"Quante volte ha fatto fatica a restare sveglio/a alla guida, ai pasti o durante attività sociali?"},
+        {id:"p9",t:"Quanto è stato un problema avere abbastanza energie per portare a termine le sue normali attività?",opts:["Per niente","Poco","Abbastanza","Molto"]}
+      ], PF, 2)}`;
+  } else if(id==="midas"){
+    body = `<h2>Giorni persi per il mal di testa</h2>
+      <p>Pensi agli <b>ultimi 3 mesi</b> e a tutti i mal di testa che ha avuto. Scriva 0 se non le è successo.</p>
+      <p class="tip">Non serve un numero esatto: una stima onesta va bene.</p>
+      <div class="fields">${MIDAS.map(([t,sub],i)=>`
+        <div class="f item" id="it_m${i}" data-id="m${i}">
+          <label class="q" for="m${i}"><span class="n">${i+1}</span><span>${esc(t)}</span></label>
+          ${sub?`<span class="muted small">${esc(sub)}</span>`:""}
+          <div class="stepper">
+            <button type="button" data-step="-1" data-for="m${i}" aria-label="Diminuisci">−</button>
+            <input id="m${i}" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="–" value="${A["m"+i]??""}">
+            <button type="button" data-step="1" data-for="m${i}" aria-label="Aumenta">+</button>
+            <span class="u">giorni</span>
+          </div>
+        </div>`).join("")}</div>
+      <p class="hint" id="midasHint" hidden></p>`;
+  }
+  screen.innerHTML = `<section class="card">${body}<p class="hint" id="missHint" hidden></p>${nav(id==="midas"?"Vedi il riepilogo":"Avanti")}</section>`;
+
+  bindChips(changed=>{
+    if(changed==="p5j_yn"){
+      const on = A.p5j_yn===1;
+      document.getElementById("it_p5j_txt").hidden = !on; document.getElementById("it_p5j").hidden = !on;
+      if(!on){ delete A.p5j_txt; delete A.p5j; }
+      else document.getElementById("p5j_txt").focus();
+    }
+  });
+  if(id==="orari"){
+    ["bed","wake"].forEach(k=>{ const hh = document.getElementById(k+"_h"), mm = document.getElementById(k+"_m");
+      const set = ()=>{ TP[k] = {h:hh.value, m:mm.value};
+        if(hh.value!=="" && mm.value===""){ mm.value="00"; TP[k].m="00"; }
+        if(hh.value!=="" && mm.value!==""){ A[k]=hh.value+":"+mm.value; document.getElementById("it_"+k).classList.remove("missing"); } else delete A[k];
+        refreshNext(); };
+      hh.addEventListener("change",set); mm.addEventListener("change",set); });
+    const h = document.getElementById("hrs");
+    h.addEventListener("change",()=>{ if(h.value===""){delete A.hrs;} else {A.hrs=+h.value;document.getElementById("it_hrs").classList.remove("missing");} refreshNext(); });
+  }
+  if(id==="dist"){
+    const t = document.getElementById("p5j_txt");
+    t.addEventListener("input",()=>{ const v=t.value.trim(); if(v){A.p5j_txt=v;document.getElementById("it_p5j_txt").classList.remove("missing");} else delete A.p5j_txt; refreshNext(); });
+  }
+  if(id==="midas"){
+    const hint = document.getElementById("midasHint");
+    const setVal = (k,raw)=>{
+      const el = document.getElementById(k);
+      if(raw===""){ delete A[k]; el.value=""; }
+      else { let n = Math.max(0, Math.min(90, parseInt(raw,10)||0)); A[k]=n; el.value=n; document.getElementById("it_"+k).classList.remove("missing"); }
+      hint.hidden = !(A.m0!==undefined && A.m1!==undefined && A.m0+A.m1>90);
+      hint.textContent = "Le risposte 1 e 2 insieme superano i 90 giorni dei 3 mesi: controlli i numeri.";
+      refreshNext();
+    };
+    screen.querySelectorAll(".stepper input").forEach(el=>el.addEventListener("input",()=>setVal(el.id, el.value.replace(/\D/g,""))));
+    screen.querySelectorAll(".stepper button").forEach(b=>b.addEventListener("click",()=>{
+      const k = b.dataset.for, v = A[k]; setVal(k, String(v===undefined ? (+b.dataset.step>0?1:0) : v + +b.dataset.step));
+    }));
+  }
+  document.getElementById("next").addEventListener("click",tryNext);
+  document.getElementById("back").addEventListener("click",()=>{cur--;render();});
+  refreshNext();
+}
+
+/* ====== CALCOLO ====== */
+function mins(t){const [h,m]=t.split(":").map(Number);return h*60+m;}
+function fmt(n){return String(Math.round(n*10)/10).replace(".",",");}
+function pad(n){return String(n).padStart(2,"0");}
+function scores(){
+  const hitItems = HIT.map((_,i)=>HIT_PTS[A["hit"+i]]);
+  const hit = hitItems.reduce((a,b)=>a+b,0);
+  const essItems = ESS.map((_,i)=>A["ess"+i]);
+  const ess = essItems.reduce((a,b)=>a+b,0);
+  const hrs = A.hrs;
+  const c2 = A.lat + A.p5a;
+  const C1 = A.p6;
+  const C2 = c2===0?0:c2<=2?1:c2<=4?2:3;
+  const C3 = hrs>7?0:hrs>=6?1:hrs>=5?2:3;
+  const inBed = (mins(A.wake)-mins(A.bed)+1440)%1440/60;
+  const eff = inBed>0 ? Math.min(100, hrs/inBed*100) : 0;
+  const C4 = eff>=85?0:eff>=75?1:eff>=65?2:3;
+  const dist = ["b","c","d","e","f","g","h","i"].reduce((a,k)=>a+A["p5"+k],0) + (A.p5j_yn===1 ? A.p5j : 0);
+  const C5 = dist===0?0:dist<=9?1:dist<=18?2:3;
+  const C6 = A.p7;
+  const c7 = A.p8 + A.p9;
+  const C7 = c7===0?0:c7<=2?1:c7<=4?2:3;
+  const midItems = MIDAS.map((_,i)=>A["m"+i]);
+  return {hit,hitItems,ess,essItems,psqi:C1+C2+C3+C4+C5+C6+C7,C:[C1,C2,C3,C4,C5,C6,C7],inBed,eff,midas:midItems.reduce((a,b)=>a+b,0),midItems};
+}
+function rows(list){return `<table class="dims"><tbody>${list.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>`;}
+function renderResult(){
+  const r = scores(), d = new Date();
+  const when = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const CN = ["Qualità soggettiva","Latenza","Durata","Efficienza","Disturbi","Farmaci per dormire","Disfunzione diurna"];
+  const hrsTxt = A.hrs===1.5?"< 2 h":A.hrs===12.5?"> 12 h":fmt(A.hrs)+" h";
+  screen.innerHTML = `<section class="card">
+    <span class="eyebrow">Completato · ${when}</span>
+    <h2>Grazie. Mostri questa schermata al medico.</h2>
+    <div class="res-sec">
+      <div class="res-head"><h3>HIT-6</h3><span class="v">${r.hit} <small>/ 36–78</small></span></div>
+      ${rows(HIT.map((_,i)=>["Domanda "+(i+1)+" · "+HIT_OPTS[A["hit"+i]], r.hitItems[i]]))}
+    </div>
+    <div class="res-sec">
+      <div class="res-head"><h3>Epworth (ESS)</h3><span class="v">${r.ess} <small>/ 24</small></span></div>
+      ${rows(ESS.map((t,i)=>[String.fromCharCode(97+i)+". "+t, r.essItems[i]]))}
+    </div>
+    <div class="res-sec">
+      <div class="res-head"><h3>PSQI globale</h3><span class="v">${r.psqi} <small>/ 21</small></span></div>
+      ${rows(CN.map((n,i)=>["C"+(i+1)+" · "+n, r.C[i]]))}
+      ${rows([
+        ["A letto · alzata", A.bed+" · "+A.wake],
+        ["Tempo a letto", fmt(r.inBed)+" h"],
+        ["Sonno effettivo", hrsTxt],
+        ["Efficienza", Math.round(r.eff)+" %"],
+        ["Latenza", LAT_OPTS[A.lat]],
+        ...(A.p5j_yn===1?[["Altro disturbo: "+A.p5j_txt, PF_FULL[A.p5j]]]:[])
+      ])}
+    </div>
+    <div class="res-sec">
+      <div class="res-head"><h3>MIDAS</h3><span class="v">${r.midas} <small>giorni</small></span></div>
+      ${rows([["1. Assenze lavoro o scuola",r.midItems[0]],["2. Rendimento lavoro o scuola dimezzato",r.midItems[1]],["3. Lavori di casa non svolti",r.midItems[2]],["4. Rendimento lavori di casa dimezzato",r.midItems[3]],["5. Attività familiari, sociali, di svago perse",r.midItems[4]]])}
+    </div>
+    <div class="nav"><button type="button" class="btn" id="back">Modifica</button>
+    <button type="button" class="btn" id="restart">Nuovo questionario</button></div>
+  </section>`;
+  document.getElementById("back").onclick = ()=>{cur--;render();};
+  document.getElementById("restart").onclick = ()=>{ for(const k in A) delete A[k]; cur=0; render(); };
+}
+render();
+</script>
+</body>
+</html>
